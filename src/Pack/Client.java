@@ -5,39 +5,105 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Scanner;
 
-public class Client {
-	public static void main(String[] args) {
-		System.out.println("Client Start");
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
+// Client는 블로킹 잡히는게 없기 때문에 스레드가 필요 없다
+public class Client extends Application {
+	Socket cs = new Socket();
+	
+	@Override
+	public void start(Stage arg0) throws Exception {
+		VBox root = new VBox(); // VBox 세로로 생김
+		root.setPrefSize(400, 300);
+		root.setSpacing(15);
+		//-------------------------------------------- 코드 시작
+		Button btn1 = new Button("접속"); 
+		Button btn2 = new Button("버튼2"); 
 		
-		try {
-			//클라이언트 소켓 생성
-			Socket cs = new Socket();
+		btn1.setOnAction(new EventHandler<ActionEvent>() {
 			
-			System.out.println("숫자를 입력하면 접속을 시도합니다.");
-			new Scanner(System.in).nextInt(); //입력을 받으면 접속하게 하기위해 사용
+			@Override
+			public void handle(ActionEvent arg0) {
+				try {
+					cs.connect(new InetSocketAddress(InetAddress.getLocalHost(), 5001));
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 
-			//접속 시도 , 자기 주소라 localhost
-			cs.connect(new InetSocketAddress(InetAddress.getLocalHost(), 5001));
-			System.out.println("숫자를 입력하면 데이터를 전송합니다.");
-			new Scanner(System.in).nextInt(); //입력을 받으면 접속하게 하기위해 사용
+		btn2.setOnAction(new EventHandler<ActionEvent>() {
+			int count = 0;
 			
-			OutputStream outputStream = cs.getOutputStream();
-			
-			// 통신용 data
-			String s = "apple"; // byte로 편하게 보내기 위해
-			byte[] data = s.getBytes(); // String -> byte타입으로
-			outputStream.write(data);
-			System.out.println("데이터 보냄");
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			@Override
+			public void handle(ActionEvent arg0) {
+				try {
+					OutputStream outputStream = cs.getOutputStream();
+					// 통신용 data
+					String s = "apple : " + count++; // byte로 편하게 보내기 위해
+					byte[] data = s.getBytes(); // String -> byte타입으로
+					outputStream.write(data);
+					System.out.println("데이터 보냄");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		
-		new Scanner(System.in).nextInt();
-		System.out.println("Client End");
-
+		root.getChildren().addAll(btn1, btn2);
+		//--------------------------------------------
+		Scene scene = new Scene(root);
+		arg0.setTitle("Client");
+		arg0.setScene(scene);
+		arg0.show();
 	}
+
+	public static void main(String[] args) {
+		launch();
+	}
+
 }
+
+//
+//public class Client {
+//	public static void main(String[] args) {
+//		System.out.println("Client Start");
+//
+//		
+//		try {
+//			//클라이언트 소켓 생성
+//			Socket cs = new Socket();
+//			
+//			System.out.println("숫자를 입력하면 접속을 시도합니다.");
+//			new Scanner(System.in).nextInt(); //입력을 받으면 접속하게 하기위해 사용
+//
+//			//접속 시도 , 자기 주소라 localhost
+//			cs.connect(new InetSocketAddress(InetAddress.getLocalHost(), 5001));
+//			System.out.println("숫자를 입력하면 데이터를 전송합니다.");
+//			new Scanner(System.in).nextInt(); //입력을 받으면 접속하게 하기위해 사용
+//			
+//			OutputStream outputStream = cs.getOutputStream();
+//			
+//			// 통신용 data
+//			String s = "apple"; // byte로 편하게 보내기 위해
+//			byte[] data = s.getBytes(); // String -> byte타입으로
+//			outputStream.write(data);
+//			System.out.println("데이터 보냄");
+//			
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		
+//		new Scanner(System.in).nextInt();
+//		System.out.println("Client End");
+//
+//	}
+//}
